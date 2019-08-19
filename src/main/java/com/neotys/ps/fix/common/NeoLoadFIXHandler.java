@@ -3,7 +3,6 @@ package com.neotys.ps.fix.common;
 import com.neotys.extensions.action.engine.SampleResult;
 import org.quickfixj.QFJException;
 import quickfix.*;
-import quickfix.field.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +19,7 @@ public class NeoLoadFIXHandler {
         this.connector = new SocketInitiator(fixApplication,storeFactory,sessionSettings,messageFactory);
         this.connector.start();
         logon(this.connector);
-        waitForSessionLogon(logonTimeout,result,"FIX-Logon");
+        waitForSessionLogon(logonTimeout,result);
     }
 
     public FIXApplication getFixApplication() {
@@ -33,7 +32,7 @@ public class NeoLoadFIXHandler {
 
     public long logout(SampleResult result) throws InterruptedException {
         logout(connector);
-        waitForSessionLogout(1000,result,"FIX-Logout");
+        waitForSessionLogout(1000,result);
         return result.getDuration();
     }
 
@@ -81,7 +80,7 @@ public class NeoLoadFIXHandler {
         return result.getDuration();
     }
 
-    private SampleResult waitForSessionLogon(long logonTimeout, SampleResult result, String neoloadAction) throws InterruptedException {
+    private SampleResult waitForSessionLogon(long logonTimeout, SampleResult result) throws InterruptedException {
         long logonStart = System.currentTimeMillis();
         long logonTime = 0;
 
@@ -96,11 +95,11 @@ public class NeoLoadFIXHandler {
             fixApplication.getLogger().info("Logon in " + result.getDuration() + " ms");
             return result;
         } else {
-            return NeoLoadUtils.throwNeoLoadError(fixApplication.getLogger(),result,neoloadAction,"Couldn't logon",new Exception());
+            return NeoLoadUtils.throwNeoLoadError(fixApplication.getLogger(),result, "FIX-Logon","Couldn't logon",new Exception());
         }
     }
 
-    private SampleResult waitForSessionLogout(long logoutTimeout, SampleResult result, String neoloadAction) throws InterruptedException {
+    private SampleResult waitForSessionLogout(long logoutTimeout, SampleResult result) throws InterruptedException {
         long logoutStart = System.currentTimeMillis();
         long logoutTime = 0;
 
@@ -115,7 +114,7 @@ public class NeoLoadFIXHandler {
             fixApplication.getLogger().info("Logout in " + result.getDuration() + " ms");
             return result;
         } else {
-            return NeoLoadUtils.throwNeoLoadError(fixApplication.getLogger(),result,neoloadAction,"Couldn't logout",new Exception());
+            return NeoLoadUtils.throwNeoLoadError(fixApplication.getLogger(),result, "FIX-Logout","Couldn't logout",new Exception());
         }
     }
 
@@ -132,30 +131,25 @@ public class NeoLoadFIXHandler {
     }
 
     private String changeMessageSenderAndTargetFromConnector(String message){
+
+        String fixSeparator = "=(\\w+)\\x01";
+
+        //Replace the message sender
         String senderTag = "49" ;
+        String senderPattern = senderTag + fixSeparator;
+        Pattern p = Pattern.compile(senderPattern);
+        Matcher m = p.matcher(message);
+        if (m.find()){
+            message = message.replace(m.group(1), connector.getSessions().get(0).getSenderCompID());
+        }
+
+        //Replace the message target
         String targetTag = "56";
-        String senderValue = "";
-        String targetValue = "";
-
-        if (message.contains(senderTag)) {
-            String pattern = senderTag + "=(\\w+)\\x01";
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(message);
-            m.find();
-            senderValue = m.group(1);
-        }
-
-        if (message.contains(targetTag)) {
-            String pattern = targetTag + "=(\\w+)\\x01";
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(message);
-            m.find();
-            targetValue = m.group(1);
-        }
-
-        if (!senderValue.isEmpty() && !targetValue.isEmpty()) {
-            message = message.replace(senderValue, connector.getSessions().get(0).getSenderCompID());
-            message = message.replace(targetValue, connector.getSessions().get(0).getTargetCompID());
+        String targetPattern = targetTag + fixSeparator;
+        p = Pattern.compile(targetPattern);
+        m = p.matcher(message);
+        if (m.find()){
+            message = message.replace(m.group(1), connector.getSessions().get(0).getTargetCompID());
         }
 
         return message;
