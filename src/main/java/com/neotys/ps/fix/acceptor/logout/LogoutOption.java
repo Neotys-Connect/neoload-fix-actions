@@ -1,31 +1,22 @@
-package com.neotys.ps.fix.send.message;
+package com.neotys.ps.fix.acceptor.logout;
 
 import com.neotys.action.argument.ArgumentValidator;
 import com.neotys.action.argument.Option;
 import com.neotys.extensions.action.ActionParameter.Type;
 
 import static com.neotys.action.argument.DefaultArgumentValidator.NON_EMPTY;
-import static com.neotys.action.argument.Option.AppearsByDefault.False;
 import static com.neotys.action.argument.Option.AppearsByDefault.True;
-import static com.neotys.action.argument.Option.OptionalRequired.Optional;
 import static com.neotys.action.argument.Option.OptionalRequired.Required;
 import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 
-enum SendMessageOption implements Option {
-    MessagePath("MessagePath",
-            Optional,
-            True,
-            TEXT,
-            "${NL-CustomResources}/messages/messages.log",
-            "Path of the message file.\n\t",
-            NON_EMPTY),
-    Message("Message",
-            Optional,
-            False,
-            TEXT,
-            "",
-            "Message to send.\n\t",
-            NON_EMPTY);
+enum LogoutOption implements Option {
+    /*SessionName("SessionName",
+                Required,
+                True,
+                TEXT,
+                "myFixSession",
+                "Name of the FIX session.\n\t",
+                NON_EMPTY)*/;
 
     private final String name;
     private final OptionalRequired optionalRequired;
@@ -35,13 +26,13 @@ enum SendMessageOption implements Option {
     private final String description;
     private final ArgumentValidator argumentValidator;
 
-    SendMessageOption(final String name,
-                      final OptionalRequired optionalRequired,
-                      final AppearsByDefault appearsByDefault,
-                      final Type type,
-                      final String defaultValue,
-                      final String description,
-                      final ArgumentValidator argumentValidator) {
+    LogoutOption(final String name,
+                 final OptionalRequired optionalRequired,
+                 final AppearsByDefault appearsByDefault,
+                 final Type type,
+                 final String defaultValue,
+                 final String description,
+                 final ArgumentValidator argumentValidator) {
         this.name = name;
         this.optionalRequired = optionalRequired;
         this.appearsByDefault = appearsByDefault;

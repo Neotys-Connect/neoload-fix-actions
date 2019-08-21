@@ -1,4 +1,4 @@
-package com.neotys.ps.fix.initiator.logout;
+package com.neotys.ps.fix.acceptor.logout;
 
 import com.google.common.base.Optional;
 import com.neotys.action.argument.Arguments;
@@ -6,6 +6,7 @@ import com.neotys.action.argument.Option.AppearsByDefault;
 import com.neotys.extensions.action.Action;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
+import com.neotys.ps.fix.acceptor.logout.LogoutActionEngine;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public final class LogoutAction implements Action{
-	private static final String BUNDLE_NAME = "com.neotys.ps.fix.initiator.logout.bundle";
+	private static final String BUNDLE_NAME = "com.neotys.ps.fix.acceptor.logout.bundle";
 	private static final String DISPLAY_NAME = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayName");
 	private static final String DISPLAY_PATH = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayPath");
 	private static final ImageIcon DISPLAY_ICON = new ImageIcon (LogoutAction.class.getResource(ResourceBundle.getBundle(BUNDLE_NAME,Locale.getDefault()).getString("iconFile")));
@@ -22,7 +23,7 @@ public final class LogoutAction implements Action{
 
 	@Override
 	public String getType() {
-		return "FIX-Logout-Initiator";
+		return "FIX-Stop-Acceptor";
 	}
 
 	@Override
@@ -56,7 +57,7 @@ public final class LogoutAction implements Action{
 
 	@Override
 	public String getDescription() {
-		return "Logout a fix initiator.\n\n"+ Arguments.getArgumentDescriptions(LogoutOption.values());
+		return "Close a fix acceptor.\n\n"+ Arguments.getArgumentDescriptions(LogoutOption.values());
 	}
 
 	@Override

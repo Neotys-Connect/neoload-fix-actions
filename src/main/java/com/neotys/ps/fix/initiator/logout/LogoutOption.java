@@ -10,13 +10,13 @@ import static com.neotys.action.argument.Option.OptionalRequired.Required;
 import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 
 enum LogoutOption implements Option {
-    SessionName("SessionName",
+    /*SessionName("SessionName",
                 Required,
                 True,
                 TEXT,
                 "myFixSession",
                 "Name of the FIX session.\n\t",
-                NON_EMPTY);
+                NON_EMPTY)*/;
 
     private final String name;
     private final OptionalRequired optionalRequired;

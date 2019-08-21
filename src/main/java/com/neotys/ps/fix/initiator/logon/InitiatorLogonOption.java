@@ -12,13 +12,6 @@ import static com.neotys.action.argument.Option.OptionalRequired.Required;
 import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 
 enum InitiatorLogonOption implements Option {
-    SessionName("SessionName",
-                Required,
-                True,
-                TEXT,
-                "myFixSession",
-                "Name of the FIX session.\n\t",
-                NON_EMPTY),
     SettingsFile("SettingsFile",
                    Required,
                    True,
@@ -31,15 +24,8 @@ enum InitiatorLogonOption implements Option {
             True,
             TEXT,
             "500",
-            "Logon timeout in s.\n\t",
-            INTEGER_VALIDATOR),
-    SenderCompID("SenderCompID",
-            Optional,
-            True,
-            TEXT,
-            "BANZAI",
-            "Overrides the SenderCompID with this value.\n\t",
-            NON_EMPTY);;
+            "Logon timeout in ms.\n\t",
+            INTEGER_VALIDATOR);
 
     private final String name;
     private final OptionalRequired optionalRequired;

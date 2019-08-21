@@ -11,7 +11,7 @@ public class NeoLoadFIXHandler {
     private FIXApplication fixApplication;
     private final Connector connector;
 
-    //FIX Logon Handler
+    //FIX Initiator Logon Handler
     public NeoLoadFIXHandler(FIXLogger logger, SessionSettings sessionSettings, long logonTimeout, SampleResult result) throws ConfigError, InterruptedException {
         this.fixApplication = new FIXApplication(logger);
         MessageStoreFactory storeFactory = new FileStoreFactory(sessionSettings);
@@ -20,6 +20,15 @@ public class NeoLoadFIXHandler {
         this.connector.start();
         logon(this.connector);
         waitForSessionLogon(logonTimeout,result);
+    }
+
+    //FIX Acceptor Handler
+    public NeoLoadFIXHandler(FIXLogger logger, SessionSettings sessionSettings) throws ConfigError, InterruptedException {
+        this.fixApplication = new FIXApplication(logger);
+        MessageStoreFactory storeFactory = new FileStoreFactory(sessionSettings);
+        MessageFactory messageFactory = new DefaultMessageFactory();
+        this.connector = new SocketAcceptor(fixApplication,storeFactory,sessionSettings,messageFactory);
+        this.connector.start();
     }
 
     public FIXApplication getFixApplication() {
@@ -86,7 +95,7 @@ public class NeoLoadFIXHandler {
 
         result.sampleStart();
         while (!connector.isLoggedOn() && logonTime < logonTimeout){
-            Thread.sleep(500);
+            Thread.sleep(100);
             logonTime = System.currentTimeMillis() - logonStart;
         }
         result.sampleEnd();
@@ -105,7 +114,7 @@ public class NeoLoadFIXHandler {
 
         result.sampleStart();
         while (connector.isLoggedOn() && logoutTime < logoutTimeout){
-            Thread.sleep(logoutTimeout);
+            Thread.sleep(100);
             logoutTime = System.currentTimeMillis() - logoutStart;
         }
         result.sampleEnd();

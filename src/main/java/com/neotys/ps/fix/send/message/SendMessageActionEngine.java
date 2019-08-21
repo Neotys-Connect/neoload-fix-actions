@@ -23,7 +23,6 @@ import static com.neotys.ps.fix.common.NeoLoadUtils.appendLineToStringBuilder;
 
 public final class SendMessageActionEngine implements ActionEngine {
 
-	private String sessionName;			//Name of the FIX session
 	private String messagePath;			//Path of the FIX messages to send
 	private String message;				//FIX message to send
 
@@ -41,7 +40,7 @@ public final class SendMessageActionEngine implements ActionEngine {
 		List<String> lines = new ArrayList<>();
 
 		//Get the FIX handler
-		NeoLoadFIXHandler neoLoadFIXHandler = (NeoLoadFIXHandler) context.getCurrentVirtualUser().get(sessionName);
+		NeoLoadFIXHandler neoLoadFIXHandler = (NeoLoadFIXHandler) context.getCurrentVirtualUser().get("fixSession");
 
 		//If we're sending messages from a file
 		if (message == null){
@@ -101,8 +100,6 @@ public final class SendMessageActionEngine implements ActionEngine {
 		}
 
 		//Load the request parameters
-		appendLineToStringBuilder(requestBuilder, "---------------Parameters---------------");
-		appendLineToStringBuilder(requestBuilder, "Session: " + sessionName);
 		appendLineToStringBuilder(requestBuilder, "-----------Session Settings----------");
 		appendLineToStringBuilder(requestBuilder, neoLoadFIXHandler.getConnector().getSessions().get(0).toString());
 
@@ -136,9 +133,6 @@ public final class SendMessageActionEngine implements ActionEngine {
 
 		for (ActionParameter temp : parameters) {
 			switch (temp.getName().toLowerCase()) {
-				case "sessionname":
-					sessionName = temp.getValue();
-					break;
 				case "messagepath":
 					messagePath = temp.getValue();
 					break;

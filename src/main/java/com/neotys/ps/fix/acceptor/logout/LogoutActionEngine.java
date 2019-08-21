@@ -1,4 +1,4 @@
-package com.neotys.ps.fix.initiator.logout;
+package com.neotys.ps.fix.acceptor.logout;
 
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
@@ -21,11 +21,10 @@ public final class LogoutActionEngine implements ActionEngine {
 		final StringBuilder responseBuilder = new StringBuilder();
 
 		//Get the session name
-		//parseParameters(context,parameters);
+//		parseParameters(context,parameters);
 
 		//Get the application
 		NeoLoadFIXHandler neoLoadFIXHandler = (NeoLoadFIXHandler) context.getCurrentVirtualUser().get("fixSession");
-
 		appendLineToStringBuilder(requestBuilder, "-----------Session Settings----------");
 		appendLineToStringBuilder(requestBuilder, neoLoadFIXHandler.getConnector().getSessions().get(0).toString());
 		sampleResult.setRequestContent(requestBuilder.toString());
@@ -34,10 +33,10 @@ public final class LogoutActionEngine implements ActionEngine {
 		try {
 			sampleResult.setDuration(neoLoadFIXHandler.logout(sampleResult));
 		} catch (InterruptedException e) {
-			NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(),sampleResult,"FIX-INITIATOR-LOGOUT","Couldn't logout initiator",e);
+			NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(),sampleResult,"FIX-ACCEPTOR-CLOSE","Couldn't close acceptor",e);
 		}
 
-		appendLineToStringBuilder(responseBuilder, "Session logged out");
+		appendLineToStringBuilder(responseBuilder, "Acceptor closed");
 
 		sampleResult.setResponseContent(responseBuilder.toString());
 		return sampleResult;

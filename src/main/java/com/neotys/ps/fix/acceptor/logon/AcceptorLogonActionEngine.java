@@ -1,4 +1,4 @@
-package com.neotys.ps.fix.initiator.logon;
+package com.neotys.ps.fix.acceptor.logon;
 
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
@@ -8,6 +8,8 @@ import com.neotys.ps.fix.common.FIXLogger;
 import com.neotys.ps.fix.common.NeoLoadFIXHandler;
 import com.neotys.ps.fix.common.NeoLoadUtils;
 import quickfix.ConfigError;
+import quickfix.Session;
+import quickfix.SessionID;
 import quickfix.SessionSettings;
 
 import java.io.FileInputStream;
@@ -16,10 +18,9 @@ import java.util.List;
 
 import static com.neotys.ps.fix.common.NeoLoadUtils.appendLineToStringBuilder;
 
-public final class InitiatorLogonActionEngine implements ActionEngine {
+public final class AcceptorLogonActionEngine implements ActionEngine {
 
 	private String sessionFilePath;		//Configuration file path
-    private long logonTimeout;          //Timeout to logon the initiator
 
 	@Override
 	public SampleResult execute(Context context, List<ActionParameter> parameters) {
@@ -33,24 +34,26 @@ public final class InitiatorLogonActionEngine implements ActionEngine {
 			//Get session setting
 			SessionSettings settings = parseParameters(context,parameters);
 
-			appendLineToStringBuilder(requestBuilder, "---------------Parameters---------------");
-			appendLineToStringBuilder(requestBuilder, "Configuration File: " + sessionFilePath);
-			appendLineToStringBuilder(requestBuilder, "Logon Timeout: " + logonTimeout + " ms");
+			appendLineToStringBuilder(requestBuilder, "-----------Config File----------");
+			appendLineToStringBuilder(requestBuilder, sessionFilePath);
 			appendLineToStringBuilder(requestBuilder, "-----------Connection Settings----------");
 			appendLineToStringBuilder(requestBuilder, settings.toString());
 			sampleResult.setRequestContent(requestBuilder.toString());
 
-			//Instantiate the client and logon
-			NeoLoadFIXHandler neoLoadFIXHandler = new NeoLoadFIXHandler(logger,settings,logonTimeout,sampleResult);
+			//Instantiate the acceptor
+			NeoLoadFIXHandler neoLoadFIXHandler = new NeoLoadFIXHandler(logger,settings);
 
-			appendLineToStringBuilder(responseBuilder, "Session opened: " + neoLoadFIXHandler.getConnector().getSessions().get(0).toString());
+			appendLineToStringBuilder(responseBuilder, "Acceptor started");
+
+			for (SessionID sessionID : neoLoadFIXHandler.getConnector().getSessions()) {
+				appendLineToStringBuilder(responseBuilder,sessionID.toString());
+			}
 
 			context.getCurrentVirtualUser().put("fixSession",neoLoadFIXHandler);
-			context.getCurrentVirtualUser().put("lineCount", (Integer) 1);
 
 		} catch (Exception e) {
 			sampleResult.setResponseContent(responseBuilder.toString());
-			return NeoLoadUtils.throwNeoLoadError(logger.getLogger(),sampleResult,"FIX-Initiator-Logon",e.getMessage(),e);
+			return NeoLoadUtils.throwNeoLoadError(logger.getLogger(),sampleResult,"FIX-Acceptor-Logon",e.getMessage(),e);
 		}
 
 		sampleResult.setResponseContent(responseBuilder.toString());
@@ -69,17 +72,10 @@ public final class InitiatorLogonActionEngine implements ActionEngine {
 				case "settingsfile":
 					sessionFilePath = context.getVariableManager().parseVariables(temp.getValue());
 					break;
-                case "logontimeout":
-                    logonTimeout = Long.parseLong(temp.getValue())*1000;
-                    break;
 				default:
 					break;
 			}
 		}
-
-		if (logonTimeout == 0){
-		    logonTimeout=500000;
-        }
 
 		return new SessionSettings(new FileInputStream(sessionFilePath));
 	}
