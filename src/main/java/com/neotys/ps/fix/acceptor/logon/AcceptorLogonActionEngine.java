@@ -36,6 +36,7 @@ public final class AcceptorLogonActionEngine implements ActionEngine {
 
 			appendLineToStringBuilder(requestBuilder, "-----------Config File----------");
 			appendLineToStringBuilder(requestBuilder, sessionFilePath);
+			appendLineToStringBuilder(requestBuilder, "Acceptor will run for " + context.getVariableManager().getValue("acceptorDuration") + " ms");
 			appendLineToStringBuilder(requestBuilder, "-----------Connection Settings----------");
 			appendLineToStringBuilder(requestBuilder, settings.toString());
 			sampleResult.setRequestContent(requestBuilder.toString());
@@ -67,15 +68,21 @@ public final class AcceptorLogonActionEngine implements ActionEngine {
 
 	private SessionSettings parseParameters(Context context, List<ActionParameter> parameters) throws IOException, ConfigError {
 
+		Long acceptorDuration = 0L;
 		for (ActionParameter temp : parameters) {
 			switch (temp.getName().toLowerCase()) {
 				case "settingsfile":
 					sessionFilePath = context.getVariableManager().parseVariables(temp.getValue());
 					break;
+				case "acceptorduration":
+					acceptorDuration = Long.parseLong(temp.getValue())*1000;
+					break;
 				default:
 					break;
 			}
 		}
+
+		context.getVariableManager().setValue("acceptorDuration",acceptorDuration.toString());
 
 		return new SessionSettings(new FileInputStream(sessionFilePath));
 	}

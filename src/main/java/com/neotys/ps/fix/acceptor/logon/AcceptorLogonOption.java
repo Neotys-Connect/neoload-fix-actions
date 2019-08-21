@@ -4,8 +4,7 @@ import com.neotys.action.argument.ArgumentValidator;
 import com.neotys.action.argument.Option;
 import com.neotys.extensions.action.ActionParameter.Type;
 
-import static com.neotys.action.argument.DefaultArgumentValidator.INTEGER_VALIDATOR;
-import static com.neotys.action.argument.DefaultArgumentValidator.NON_EMPTY;
+import static com.neotys.action.argument.DefaultArgumentValidator.*;
 import static com.neotys.action.argument.Option.AppearsByDefault.True;
 import static com.neotys.action.argument.Option.OptionalRequired.Optional;
 import static com.neotys.action.argument.Option.OptionalRequired.Required;
@@ -18,7 +17,14 @@ enum AcceptorLogonOption implements Option {
                    TEXT,
                 "${NL-CustomResources}/fix-server.cfg",
                            "Settings file to create an acceptor.\n\t",
-                   NON_EMPTY);
+                   NON_EMPTY),
+    AcceptorDuration("AcceptorDuration",
+            Optional,
+            True,
+            TEXT,
+            "60",
+            "Duration in seconds the acceptor will run for.\n\t",
+            LONG_VALIDATOR);
 
     private final String name;
     private final OptionalRequired optionalRequired;
