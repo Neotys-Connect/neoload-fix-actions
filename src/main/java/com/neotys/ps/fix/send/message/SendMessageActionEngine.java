@@ -92,6 +92,11 @@ public final class SendMessageActionEngine implements ActionEngine {
 
 				//Load the message
 				message = SendMessageUtils.getMessage(line);
+				if (iterationNumber == lineCount) {
+					appendLineToStringBuilder(responseBuilder, "Message number: " + iterationNumber.toString());
+					appendLineToStringBuilder(responseBuilder, "Last message for VU: " + context.getCurrentVirtualUser().getId());
+					context.getVariableManager().setValue("stopVU", "true");
+				}
 			} else {
 				appendLineToStringBuilder(responseBuilder, "Message number: " + iterationNumber.toString());
 				appendLineToStringBuilder(responseBuilder, "No more message for VU: " + context.getCurrentVirtualUser().getId());
