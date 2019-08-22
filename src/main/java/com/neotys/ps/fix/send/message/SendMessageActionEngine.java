@@ -7,10 +7,7 @@ import com.neotys.extensions.action.engine.SampleResult;
 import com.neotys.ps.fix.common.FIXUtils;
 import com.neotys.ps.fix.common.NeoLoadFIXHandler;
 import com.neotys.ps.fix.common.NeoLoadUtils;
-import quickfix.Initiator;
 import quickfix.InvalidMessage;
-import quickfix.Session;
-import quickfix.SessionID;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -27,6 +24,7 @@ public final class SendMessageActionEngine implements ActionEngine {
 	private String message;				//FIX message to send
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public SampleResult execute(Context context, List<ActionParameter> parameters) {
 
 		final SampleResult sampleResult = new SampleResult();
@@ -45,31 +43,26 @@ public final class SendMessageActionEngine implements ActionEngine {
 		//If we're sending messages from a file
 		if (message == null){
 			//Initialise the list of messages on 1st iteration or load from context in other cases
-			switch (iterationNumber) {
-				case 1:
-					try {
-						BufferedReader reader = getMessageFile(context);
-						String line = reader.readLine();
-						while (line != null) {
-							neoLoadFIXHandler.getFixApplication().getLogger().debug("Line read from " + context.getVariableManager().parseVariables(messagePath) + ": " + line);
-							lines.add(line);
-							line = reader.readLine();
-						}
-
-						context.getCurrentVirtualUser().put("lineCount", lines.size());
-						reader.close();
-
-					} catch (FileNotFoundException e) {
-						NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(), sampleResult, "FIX-SENDMESSAGE", "Couldn't find file", e);
-					} catch (IOException e) {
-						e.printStackTrace();
-						NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(), sampleResult, "FIX-SENDMESSAGE", "Couldn't read from file", e);
+			if (iterationNumber == 1) {
+				try {
+					BufferedReader reader = getMessageFile(context);
+					String line = reader.readLine();
+					while (line != null) {
+						neoLoadFIXHandler.getFixApplication().getLogger().debug("Line read from " + context.getVariableManager().parseVariables(messagePath) + ": " + line);
+						lines.add(line);
+						line = reader.readLine();
 					}
-					break;
-				default:
-					//Get the messages from the context
-					lines = (List<String>) context.getCurrentVirtualUser().get("messages");
-					break;
+
+					context.getCurrentVirtualUser().put("lineCount", lines.size());
+					reader.close();
+
+				} catch (FileNotFoundException e) {
+					NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(), sampleResult, "FIX-SENDMESSAGE", "Couldn't find file", e);
+				} catch (IOException e) {
+					NeoLoadUtils.throwNeoLoadError(neoLoadFIXHandler.getFixApplication().getLogger(), sampleResult, "FIX-SENDMESSAGE", "Couldn't read from file", e);
+				}
+			} else {//Get the messages from the context
+				lines = (List<String>) context.getCurrentVirtualUser().get("messages");
 			}
 
 			//Get the number of remaining lines in the file
@@ -92,7 +85,7 @@ public final class SendMessageActionEngine implements ActionEngine {
 
 				//Load the message
 				message = SendMessageUtils.getMessage(line);
-				if (iterationNumber == lineCount) {
+				if (iterationNumber.equals(lineCount)) {
 					appendLineToStringBuilder(responseBuilder, "Message number: " + iterationNumber.toString());
 					appendLineToStringBuilder(responseBuilder, "Last message for VU: " + context.getCurrentVirtualUser().getId());
 					context.getVariableManager().setValue("stopVU", "true");

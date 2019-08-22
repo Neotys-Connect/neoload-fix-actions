@@ -95,7 +95,7 @@ public class NeoLoadFIXHandler {
 
         result.sampleStart();
         while (!connector.isLoggedOn() && logonTime < logonTimeout){
-            Thread.sleep(100);
+            Thread.sleep(1);
             logonTime = System.currentTimeMillis() - logonStart;
         }
         result.sampleEnd();
@@ -114,7 +114,7 @@ public class NeoLoadFIXHandler {
 
         result.sampleStart();
         while (connector.isLoggedOn() && logoutTime < logoutTimeout){
-            Thread.sleep(100);
+            Thread.sleep(1);
             logoutTime = System.currentTimeMillis() - logoutStart;
         }
         result.sampleEnd();
